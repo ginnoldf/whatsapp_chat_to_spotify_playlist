@@ -6,6 +6,8 @@ from urllib.parse import urlencode
 import re
 from requests.exceptions import HTTPError
 
+
+import spotify
 import util
 
 CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
@@ -31,10 +33,11 @@ def root():
 def login():
     session['state'] = util.get_random_string(16)
     url = 'https://accounts.spotify.com/authorize?'
+    scope = 'user-read-private playlist-modify-private playlist-modify-public playlist-read-private playlist-read-collaborative'
     params = {
         'response_type': 'code',
         'client_id': CLIENT_ID,
-        'scope': 'user-read-private user-read-email playlist-modify-private playlist-modify-public',
+        'scope': scope,
         'redirect_uri': REDIRECT_URI,
         'state': session['state']
     }
@@ -65,13 +68,9 @@ def callback():
     session['access_token'] = token_response.json()['access_token']
 
     # get users name to welcome them
-    playlist_url = 'https://api.spotify.com/v1/me'
-    headers = {'Authorization': 'Bearer ' + session['access_token']}
-    user_response = requests.get(playlist_url, params=params, headers=headers)
-    session['display_name'] = user_response.json()['display_name']
-    app.logger.info(session['display_name'] + ' logged in')
+    session['display_name'], session['spotify_user_id'] = spotify.get_userinfo(access_token=session['access_token'])
 
-    # redirect to playlist page
+    # redirect to form page
     return redirect('/form')
 
 
@@ -80,7 +79,9 @@ def form():
     # verify session
     if not util.session_valid(session):
         return redirect('/login')
-    return render_template('form.html', display_name=session['display_name'])
+    playlists = spotify.get_playlists(access_token=session['access_token'], spotify_user_id=session['spotify_user_id'])
+    app.logger.debug(playlists)
+    return render_template('form.html', display_name=session['display_name'], playlists=playlists)
 
 
 @app.route('/chat-to-playlist', methods=['POST'])
@@ -91,7 +92,10 @@ def chat_to_playlist():
 
     # read request
     received_file = request.files['chat_export']
-    playlist_id = request.form['playlist_id']
+    playlist_setting = request.form['playlist_rb']
+    new_playlist_name = request.form['new_playlist_name']
+    playlist_id = request.form['playlist_existing']
+
 
     # read chat file
     chat_path = '/tmp/' + util.get_random_string(16) + '.txt'
@@ -119,52 +123,30 @@ def chat_to_playlist():
             if url.startswith(track_prefix):
                 chat_track_ids.append(url.strip(track_prefix).split('?')[0])
 
+    # create a playlist if chosen
+    if playlist_setting == 'NEW':
+        playlist_id = spotify.create_playlist(access_token=session['access_token'],
+                                              spotify_user_id=session['spotify_user_id'],
+                                              playlist_name=new_playlist_name)
+
     # get tracks currently in the playlist
-    playlist_api_url = 'https://api.spotify.com/v1/playlists/' + playlist_id + '/tracks'
-    params = {'playlist_id': playlist_id}
-    headers = {'Authorization': 'Bearer ' + session['access_token']}
-    response = requests.get(playlist_api_url, params=params, headers=headers)
-
-    # handle unsuccessful playlist request
-    if response.status_code != 200:
-        return render_template('error.html', message='could not get playlist')
-
-    # get track ids
-    playlist_track_ids = [x['track']['id'] for x in response.json()['items']]
-    playlist_url = 'https://open.spotify.com/playlist/' + playlist_id
+    playlist_track_ids = spotify.get_playlist_track_ids(access_token=session['access_token'], playlist_id=playlist_id)
 
     # create requests to add tracks
     uris_to_add = []
     for track_id in chat_track_ids:
-
         # continue only if the track is not in the playlist already
         if track_id not in playlist_track_ids:
             uris_to_add.append('spotify:track:' + track_id)
 
-    # add 100 tracks at a time
-    while len(uris_to_add) > 0:
-        add_tracks_url = 'https://api.spotify.com/v1/playlists/' + playlist_id + '/tracks'
-        add_tracks_data = {'uris': uris_to_add[:100]}
-        add_tracks_headers = {'Authorization': 'Bearer ' + session['access_token']}
+    # add tracks to playlist
+    spotify.add_tracks_to_playlist(access_token=session['access_token'],
+                                   playlist_id=playlist_id,
+                                   track_uris=uris_to_add)
 
-        try:
-            add_tracks_response = requests.post(add_tracks_url, json=add_tracks_data, headers=add_tracks_headers)
-        except HTTPError as e:
-            app.logger.debug(e.response.text)
-            return render_template('error.html', message='could not add tracks')
-
-        # somehow not all requests throw exceptions
-        if add_tracks_response.status_code not in [200, 201]:
-            app.logger.debug('response status: ' + str(add_tracks_response.status_code))
-            app.logger.debug(add_tracks_response.reason)
-            return render_template('error.html', message='Spotify said '
-                                                         + str(add_tracks_response.status_code)
-                                                         + ' ' + add_tracks_response.reason)
-
-        # remove tracks that were added from the list
-        del uris_to_add[:100]
-
-    return render_template("done.html", display_name=session['display_name'], playlist_url=playlist_url)
+    return render_template("done.html",
+                           display_name=session['display_name'],
+                           playlist_url='https://open.spotify.com/playlist/' + playlist_id)
 
 
 if __name__ == "__main__":

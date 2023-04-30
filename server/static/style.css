@@ -19,13 +19,19 @@ body {
     overflow: hidden;
 }
 
+h1 {
+    margin: 0 0 60px;
+}
+
 h2 {
-    margin: 50px 0 50px;
+    font-size: 20px;
+    margin-top: 0px;
 }
 
 label {
-    font-size: 20px;
+    font-size: 16px;
 }
+
 
 form {
     text-align: center;
@@ -39,9 +45,22 @@ form {
 input[type="file"] {
     font-size: 17px;
     color: #b8b8b8;
+    margin-bottom: 50px;
 }
 
+
 input[type=text] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: none;
+    border-bottom: 2px solid dimgrey;
+    font-size: 15px;
+}
+
+select {
+    background: none;
     width: 100%;
     padding: 12px 20px;
     margin: 8px 0;
