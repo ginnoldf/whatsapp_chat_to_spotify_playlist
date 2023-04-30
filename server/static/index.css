@@ -1,0 +1,7 @@
+body {
+    background-image: url("whatsapp_spotify.png");
+}
+
+input[type=submit]{
+    background-color: #1DB954;
+}

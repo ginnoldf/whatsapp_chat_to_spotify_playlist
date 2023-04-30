@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat to Playlist</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='form.css')}}" />
+</head>
+
+<body>
+    <h1>Welcome {{ display_name }}</h1>
+    <h2>Here's to sharing spotify music via whatsapp!</h2>
+
+    <form action="/chat-to-playlist" method="post" enctype="multipart/form-data">
+        <div class="left">
+            <label for="chat_export">Select your chat export:</label>
+            <br><br>
+            <input type="file" id="chat_export" name="chat_export" />
+            <br><br><br>
+            <label for="playlist_id">The ID of your playlist:</label>
+            <br>
+            <input type="text" id="playlist_id" name="playlist_id" >
+        </div>
+        <input type="submit" value="Let's go">
+    </form>
+
+
+
+</body>
+
+</html>

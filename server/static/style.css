@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-image: url("whatsapp_spotify.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: top center;
+    height: 100vh;
+    font-family: 'Varela Round', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: left;
+    text-align: center;
+    margin: 110px auto;
+    overflow: hidden;
+}
+
+h2 {
+    margin: 50px 0 50px;
+}
+
+label {
+    font-size: 20px;
+}
+
+form {
+    text-align: center;
+}
+
+.left {
+    justify-content: start;
+    text-align: start;
+}
+
+input[type="file"] {
+    font-size: 17px;
+    color: #b8b8b8;
+}
+
+input[type=text] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: none;
+    border-bottom: 2px solid dimgrey;
+    font-size: 15px;
+}
+
+input[type=submit]{
+    background-color: #6678fa;
+    justify-content: center;
+    font-family: 'Varela Round', sans-serif;
+    border: none;
+    border-radius: 6px;
+    box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset,rgba(50, 50, 93, .1) 0 2px 5px 0, rgba(50, 50, 93, .1) 0 1px 1px 0;
+    box-sizing: border-box;
+    font-size: 25px;
+    color: white;
+    padding: 12px 28px;
+    text-decoration: none;
+    cursor: pointer;
+    margin: 30px;
+}

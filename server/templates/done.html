@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat to Playlist</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='done.css')}}" />
+</head>
+
+<body>
+    <h1>Congratulations {{ display_name }}!</h1>
+    <h2>You created a spotify playlist from your whatsapp chat</h2>
+    <br>
+    <h2><a href=" {{ playlist_url }}">Your Playlist</a></h2>
+    <br>
+    <form method="post" action="/form">
+        <input type="submit" name="form" value="Back to the form"/>
+    </form>
+
+</body>
+
+</html>

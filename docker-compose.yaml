@@ -1,0 +1,14 @@
+version: "3.1"
+
+services:
+  flask-webserver:
+    build:
+      context: .
+    environment:
+      - FLASK_APP=server.py
+      - SPOTIFY_CLIENT_ID=c37753bcd6de4be1897691442fcd6759
+      - SPOTIFY_REDIRECT_URI=http://localhost:8080/callback
+    env_file:
+      - secret.env
+    ports:
+      - "8080:8080"
