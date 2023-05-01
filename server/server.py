@@ -33,7 +33,7 @@ def root():
 def login():
     session['state'] = util.get_random_string(16)
     url = 'https://accounts.spotify.com/authorize?'
-    scope = 'user-read-private playlist-modify-private playlist-modify-public playlist-read-private playlist-read-collaborative'
+    scope = 'user-read-private playlist-modify-private playlist-modify-public playlist-read-private playlist-read-collaborative ugc-image-upload'
     params = {
         'response_type': 'code',
         'client_id': CLIENT_ID,
@@ -80,7 +80,6 @@ def form():
     if not util.session_valid(session):
         return redirect('/login')
     playlists = spotify.get_playlists(access_token=session['access_token'], spotify_user_id=session['spotify_user_id'])
-    app.logger.debug(playlists)
     return render_template('form.html', display_name=session['display_name'], playlists=playlists)
 
 
@@ -128,6 +127,7 @@ def chat_to_playlist():
         playlist_id = spotify.create_playlist(access_token=session['access_token'],
                                               spotify_user_id=session['spotify_user_id'],
                                               playlist_name=new_playlist_name)
+        spotify.set_cover_image(session['access_token'], playlist_id)
 
     # get tracks currently in the playlist
     playlist_track_ids = spotify.get_playlist_track_ids(access_token=session['access_token'], playlist_id=playlist_id)

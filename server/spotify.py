@@ -1,4 +1,5 @@
 import requests
+import base64
 
 from server import app
 
@@ -41,7 +42,7 @@ def create_playlist(access_token, spotify_user_id, playlist_name):
     create_playlist_headers = {'Authorization': 'Bearer ' + access_token}
     create_playlist_data = {
         "name": playlist_name,
-        "description": "Created by chat2playlist",
+        "description": "Created by whatsapp2spotify",
         "public": False
     }
     add_tracks_response = requests.post(create_playlist_url,
@@ -74,3 +75,14 @@ def add_tracks_to_playlist(access_token, playlist_id, track_uris):
 
         # remove tracks that were added from the list
         del track_uris[:batch_size]
+
+
+# set a cover image for a playlist
+def set_cover_image(access_token, playlist_id):
+    set_cover_image_url = 'https://api.spotify.com/v1/playlists/' + playlist_id + '/images'
+    set_cover_image_headers = {'Authorization': 'Bearer ' + access_token, 'Content-Type': 'image/jpeg'}
+    with open("static/cover.jpg", "rb") as image_file:
+        set_cover_image_data = base64.b64encode(image_file.read()).decode("ascii")
+    set_cover_image_ = requests.put(set_cover_image_url,
+                                    data=set_cover_image_data,
+                                    headers=set_cover_image_headers)
